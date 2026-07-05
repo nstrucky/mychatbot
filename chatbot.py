@@ -28,6 +28,11 @@ while True:
 	if input_text.lower() == "exit":
 		break
 
+	# Added this to account for network latency causing blank 
+	# entries in the terminal
+	if input_text == None:
+		continue
+
 	prompt = history_string + f"\nUser: {input_text}\nBot:"
 
 	# Tokenizer converts prompt string into tokens/vector vaules
@@ -56,7 +61,7 @@ while True:
 
 
 	response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-	print(f"Bot: {response}")
+	print("Bot:", response)
 
 	conversation_history.append(f"User: {input_text}")
 	conversation_history.append(f"Bot: {response}")
