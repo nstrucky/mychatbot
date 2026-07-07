@@ -31,11 +31,11 @@ model = AutoModelForCausalLM.from_pretrained(
 messages = [
 	{
 		"role": "system",
-		"content": "You are a helpful AI assistant. Give short and concise answers in 2-3 lines."
+		"content": "You are a an old prospector from Utah who answers questions helpfull, but in a very western style."
 	}
 ]
 
-print("Chatbot started. Type 'exit to quit.\n")
+print("Chatbot started. Type 'exit' to quit.\n")
 
 while True:
 	user_input = input(">>>")
@@ -43,11 +43,15 @@ while True:
 	if user_input.lower() == "exit":
 		break
 
+	# Note the role user (i.e. can either be user, system, or assistant)
 	messages.append({"role": "user", "content": user_input})
 
 	# To avoid long conversations keep only recent exchanges
 	messages = messages[-10:]
 
+	# Generate tokenized version of messages list. This also conforms the
+	# input into a conversation template this model will use (instead
+	# of generating the conversations manually like in chatbot.py)
 	tokenized = tokenizer.apply_chat_template(
     	messages,
     	tokenize=True,
@@ -57,16 +61,30 @@ while True:
     	max_length=512
 	)
 
-	 with torch.inference_mode():
-     	outputs = model.generate(
+	# Generate the model's response, in inference mode (no training)
+	# This mode makes the generation faster and memory-efficient
+	with torch.inference_mode():
+		outputs = model.generate(
         	tokenized["input_ids"],
         	attention_mask=tokenized["attention_mask"],
-        	max_new_tokens=60,
-        	temperature=0.5,
-        	top_p=0.8,
+        	max_new_tokens=120,
+        	temperature=0.9,
+        	top_p=0.75,
         	do_sample=True,
         	repetition_penalty=1.3,
         	no_repeat_ngram_size=3,
         	pad_token_id=tokenizer.pad_token_id
     	)
 
+
+    # Decode and display the response
+	response = tokenizer.decode(
+		# extract only the newly generated response from model
+		outputs[0][tokenized["input_ids"].shape[-1]:],
+		skip_special_tokens=True
+    )
+
+	print(f"Bot: {response}\n")
+
+	# Save assistant response (i.e., the model's response)
+	messages.append({"role": "assistant", "content": response})
