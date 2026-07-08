@@ -14,7 +14,7 @@ echo "====Installing packages====="
 
 #Installing packages - enter new ones here
 "$(pwd)/bin/pip3" install transformers==4.41.2 torch==2.2.2 \
-accelerate==0.30.1 numpy==1.26.4 flask flask_cors
+accelerate==0.30.1 numpy==1.26.4
 
 
 echo "====Installation Complete!===="
